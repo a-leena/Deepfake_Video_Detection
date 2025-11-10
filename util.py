@@ -1,6 +1,64 @@
 import joblib
 from keras.utils import to_categorical
 import numpy as np
+import cv2
+import os
+from sklearn.model_selection import train_test_split
+import pandas as pd
+
+def extract_frames(video_path, img_size=(224,224), num_frames=5):
+    print(video_path)
+    cap = cv2.VideoCapture(video_path)
+    frames = []
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    frame_interval = max(total_frames//num_frames, 1)
+    for i in range(num_frames):
+        cap.set(cv2.CAP_PROP_POS_FRAMES, i*frame_interval)
+        ret, frame = cap.read()
+        # break the loop if end of the video is reached
+        if not ret:
+            break
+        frame = cv2.resize(frame, img_size)
+        frames.append(frame)
+    cap.release()
+    # fill any missing frames with blank frames
+    while len(frames) < num_frames:
+        frames.append(np.zeros(img_size+(3,), np.uint8))
+    return np.array(frames)
+
+def train_val_test_split_data(data_dir, num_frames=5, split_ratio=(0.7, 0.15, 0.15)):
+    X_train, X_val, X_test = [], [], []
+    y_train, y_val, y_test = [], [], []
+
+    for cls in ['real', 'fake']:
+
+        source = os.path.join(data_dir, cls)
+        all_files = os.listdir(source)
+        train_files, val_test_files = train_test_split(all_files, train_size=split_ratio[0], random_state=42)
+        val_files, test_files = train_test_split(val_test_files, test_size=0.5, random_state=42)
+        cls_data = {'train':[], 'val':[], 'test':[]}
+        for split, files in zip(['train', 'val', 'test'],
+                                [train_files, val_files, test_files]):
+            print(f"{split.upper()} set: {len(files)} videos")
+            for file in files:
+                cls_data[split].append(extract_frames(os.path.join(source, file), num_frames=num_frames))
+
+        X_train.extend(cls_data['train'])
+        X_val.extend(cls_data['val'])
+        X_test.extend(cls_data['test'])
+        y_train.extend([cls]*len(cls_data['train']))
+        y_val.extend([cls]*len(cls_data['val']))
+        y_test.extend([cls]*len(cls_data['test']))
+    
+    split_3d_data = {
+        'X_train':np.array(X_train),
+        'X_val':np.array(X_val),
+        'X_test':np.array(X_test),
+        'y_train':np.array(y_train),
+        'y_val':np.array(y_val),
+        'y_test':np.array(y_test)
+    }
+    return split_3d_data
 
 def load_split_3d_data(data_path):
     split_3d_data = joblib.load(data_path)
@@ -12,6 +70,31 @@ def load_split_3d_data(data_path):
     y_test = split_3d_data['y_test']
     return X_train, X_val, X_test, y_train, y_val, y_test
 
+def target_factorization(split, y=None, y_train=None, y_val=None, y_test=None):
+    '''
+    `split` indicates the number of subsets of y
+    `y` is the entire target series, provided if `split=1`
+    if `split=2` we will have `y_train` and `y_test`
+    if `split=3` we will have `y_train`, `y_val`, and `y_test`
+    `y_train` is the target series for training data
+    `y_val` is the target series for validation data
+    `y_test` is the target series for testing data
+
+    Function returns the labels as well as the factorized target data
+    '''
+    if split==1:
+        labels, y = pd.factorize(y)
+        return labels, y
+    if split==2:
+        labels, y_train = pd.factorize(y_train)
+        y_test = pd.factorize(y_test)[1]
+        return labels, y_train, y_test
+    if split==3:
+        labels, y_train = pd.factorize(y_train)
+        y_val = pd.factorize(y_val)[1]
+        y_test = pd.factorize(y_test)[1]
+        return labels, y_train, y_val, y_test
+    return None
 
 def one_hot_encoding(num_categories, split, y=None, y_train=None, y_val=None, y_test=None):
     '''
