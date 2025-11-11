@@ -32,3 +32,17 @@ Video-based classification is carried out, where the 3D data is directly fed int
 * Directly learns the spatio-temporal features
 * Training was computationally very expensive
 * Accuracy = **50%**
+
+### MobileNetV2 with GRUs
+* Embeddings are obtained for the frames of videos, and reshaped such that we have embeddings for different timesteps (number of video frames) using MobileNetV2 pretrained on ImageNet
+* The embeddings are fed into different architectures of stacked GRUs for capturing temporal dependencies
+* Amongst all experimented architectures, the one having 2 stacked GRUs performed the best
+* Best Accuracy = **66.7%**
+
+### TimeDistributed CNN Autoencoders
+* TimeDistributed CNN-based autoencoder is created to reconstruct the real videos
+* Encoder part of the trained autoencoder is utilized followed by GRUs to capture spatial & temporal dependencies.
+* Accuracy = **53.3%**
+
+# Simulation
+To simulate the Deepfake video detection, a simple Streamlit app is created. Click [here](https://deepfakevideodetection-dlproject.streamlit.app/) to view app.
