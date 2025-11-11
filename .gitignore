@@ -152,7 +152,7 @@ tuner_results/
 tuning/
 
 # artifacts
-artifacts/
+other_artifacts/
 
 # Spyder project settings
 .spyderproject
