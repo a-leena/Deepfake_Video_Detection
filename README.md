@@ -47,4 +47,4 @@ Video-based classification is carried out, where the 3D data is directly fed int
 ## Simulation
 To simulate the Deepfake video detection, a simple Streamlit app is created. 
 > Click [here](https://deepfakevideodetection-dlproject.streamlit.app/) to view app.
-> Download sample videos [here](https://drive.google.com/drive/folders/1YHvuWToOMip8iF1NjQtVKt0Gyi_tjy7P?usp=drive_link) for testing the app from.
+> Download sample videos [here](https://drive.google.com/drive/folders/1YHvuWToOMip8iF1NjQtVKt0Gyi_tjy7P?usp=drive_link) for testing the app.
