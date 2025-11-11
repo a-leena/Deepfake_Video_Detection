@@ -1,8 +1,5 @@
-tempfile
-os
 numpy
-pandas
-tensorflow
+keras
 opencv-python-headless
 scikit-learn
 joblib
