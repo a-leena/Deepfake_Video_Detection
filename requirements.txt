@@ -1,4 +1,5 @@
 numpy
+tensorflow
 keras
 opencv-python-headless
 scikit-learn
