@@ -44,5 +44,5 @@ Video-based classification is carried out, where the 3D data is directly fed int
 * Encoder part of the trained autoencoder is utilized followed by GRUs to capture spatial & temporal dependencies.
 * Accuracy = **53.3%**
 
-# Simulation
+## Simulation
 To simulate the Deepfake video detection, a simple Streamlit app is created. Click [here](https://deepfakevideodetection-dlproject.streamlit.app/) to view app.
