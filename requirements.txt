@@ -1,0 +1,8 @@
+tempfile
+os
+numpy
+pandas
+keras
+opencv-python-headless
+scikit-learn
+joblib
