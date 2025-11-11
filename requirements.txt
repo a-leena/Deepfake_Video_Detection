@@ -2,7 +2,7 @@ tempfile
 os
 numpy
 pandas
-keras
+tensorflow
 opencv-python-headless
 scikit-learn
 joblib

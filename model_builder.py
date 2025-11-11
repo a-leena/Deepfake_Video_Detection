@@ -1,20 +1,22 @@
 import os
 import numpy as np
-import keras
-from keras.models import Sequential
-from keras.layers import Input, Dense, Lambda, GRU, TimeDistributed, Bidirectional, BatchNormalization, Dropout
-from keras.optimizers import Adam, RMSprop, SGD
-from keras.callbacks import EarlyStopping
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import (
+    Input, Dense, GRU, Bidirectional, BatchNormalization, Dropout
+)
+from tensorflow.keras.optimizers import Adam, RMSprop, SGD
+from tensorflow.keras.callbacks import EarlyStopping
 import util
 
 PRETRAINED_MODELS = {
-    'MobileNetV2': (keras.applications.MobileNetV2, keras.applications.mobilenet_v2.preprocess_input, (224,224)),
-    'DenseNet121': (keras.applications.DenseNet121, keras.applications.densenet.preprocess_input, (224,224)),
-    'EfficientNetB0': (keras.applications.EfficientNetB0, keras.applications.efficientnet.preprocess_input, (224,224)),
-    'EfficientNetB3': (keras.applications.EfficientNetB3, keras.applications.efficientnet.preprocess_input, (300,300)),
-    'ResNet50': (keras.applications.ResNet50, keras.applications.resnet.preprocess_input, (224,224)),
-    'InceptionV3': (keras.applications.InceptionV3, keras.applications.inception_v3.preprocess_input, (299,299)),
-    'Xception': (keras.applications.Xception, keras.applications.xception.preprocess_input, (299,299)),
+    'MobileNetV2': (tf.keras.applications.MobileNetV2, tf.keras.applications.mobilenet_v2.preprocess_input, (224,224)),
+    'DenseNet121': (tf.keras.applications.DenseNet121, tf.keras.applications.densenet.preprocess_input, (224,224)),
+    'EfficientNetB0': (tf.keras.applications.EfficientNetB0, tf.keras.applications.efficientnet.preprocess_input, (224,224)),
+    'EfficientNetB3': (tf.keras.applications.EfficientNetB3, tf.keras.applications.efficientnet.preprocess_input, (300,300)),
+    'ResNet50': (tf.keras.applications.ResNet50, tf.keras.applications.resnet.preprocess_input, (224,224)),
+    'InceptionV3': (tf.keras.applications.InceptionV3, tf.keras.applications.inception_v3.preprocess_input, (299,299)),
+    'Xception': (tf.keras.applications.Xception, tf.keras.applications.xception.preprocess_input, (299,299)),
 }
 
 LABELS = ['real','fake']
@@ -175,7 +177,7 @@ def classifier(video_path, trained_classifier_path, num_frames=16, img_model_nam
     
     video_embeddings = get_embeddings(img_model, img_preprocessor, video_data_3d, 1, num_frames, img_size)
     
-    trained_classifier = keras.models.load_model(trained_classifier_path)
+    trained_classifier = tf.keras.models.load_model(trained_classifier_path)
     
     prediction = (trained_classifier.predict(video_embeddings)>=0.5).astype(int)[0][0]
     
