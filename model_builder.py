@@ -19,7 +19,7 @@ PRETRAINED_MODELS = {
 
 LABELS = ['real','fake']
 
-def get_temporal_model(num_gru=2, gru_units=256, bidirectional=False, num_dense=0, smallest_dense_units=128, batchnorm=False, dropout_rate=0.5):
+def get_temporal_model(num_frames, embedding_dim, num_gru=2, gru_units=256, bidirectional=False, num_dense=0, smallest_dense_units=128, batchnorm=False, dropout_rate=0.5):
     '''
     1. All GRUs will have the same number of units.
     2. `smallest_dense_units` is the number of units in the last Dense layer (if any) before output layer
@@ -29,7 +29,7 @@ def get_temporal_model(num_gru=2, gru_units=256, bidirectional=False, num_dense=
     3. If `batchnorm` is True add BatchNormalization between every pair of GRUs
     4. Dropout is added after GRU, between every pair of Dense layers, and after Dense layer
     '''
-    layers = []
+    layers = [Input(shape=(num_frames, embedding_dim))]
     # adding GRUs
     for _ in range(num_gru-1):
         gru = GRU(gru_units, return_sequences=True)
@@ -70,10 +70,9 @@ def get_embeddings(img_model, img_preprocessor, X_frames, num_data, num_frames, 
     print("Embeddings shape:",embeddings.shape)
     return embeddings.reshape(num_data, num_frames, -1)
 
-def build_classifier(num_frames, embedding_dim, temporal_model, optimizer_name='adam', optimizer_lr=1e-5, momentum=None, nesterov=False):
+def build_classifier(temporal_model, optimizer_name='adam', optimizer_lr=1e-5, momentum=None, nesterov=False):
     
     classifier = Sequential([
-        Input(shape=(num_frames, embedding_dim)),
         temporal_model,
         Dense(1, activation='sigmoid')
     ])
@@ -137,16 +136,17 @@ X_test: {split_3d_data['y_test'].shape}""")
 
     embedding_dim = train_embeddings.shape[-1]
 
-    temporal_model = get_temporal_model(num_gru, gru_units, bidirectional, num_dense, 
+    temporal_model = get_temporal_model(num_frames, embedding_dim, num_gru, gru_units, bidirectional, num_dense, 
                                         smallest_dense_units, batchnorm, dropout_rate)
     
+    temporal_model.summary()
     print("Temporal model defined.")
 
-    classifier = build_classifier(num_frames, embedding_dim, temporal_model, 
+    classifier = build_classifier(temporal_model, 
                                   optimizer_name, optimizer_lr, 
                                   momentum=None, nesterov=False)
     
-    print(classifier.summary())
+    classifier.summary()
     
     callbacks=[]
     if estop and reduce_lr_on_plateau:

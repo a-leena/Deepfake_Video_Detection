@@ -6,6 +6,8 @@ import joblib
 from keras.utils import to_categorical
 from sklearn.model_selection import train_test_split
 
+ARTIFACT_DIR = "other_artifacts"
+
 def extract_frames(video_path, img_size=(224,224), num_frames=5):
     # print(video_path)
     cap = cv2.VideoCapture(video_path)
@@ -88,8 +90,9 @@ def target_factorization(split, y=None, y_train=None, y_val=None, y_test=None):
     return None
 
 def prepare_3d_video_data(data_dir, img_size=(224,224), num_frames=5, split_ratio=(0.7, 0.15, 0.15)):
-    if data_dir==os.path.join('data', 'DFD') and num_frames==16 and img_size==(224,224):
-        X_train, X_val, X_test, y_train, y_val, y_test = load_split_3d_data(os.path.join('artifacts', 'split_3d_data.pkl'))
+    split_3d_data_path = os.path.join(ARTIFACT_DIR, f"split_3d_data_{os.path.basename(data_dir).lower()}_{str(num_frames)}_{str(img_size[0])}.pkl")        
+    if os.path.exists(split_3d_data_path):
+        X_train, X_val, X_test, y_train, y_val, y_test = load_split_3d_data(split_3d_data_path)
         split_3d_data = {
             'X_train':X_train,
             'X_val':X_val,
@@ -106,6 +109,7 @@ def prepare_3d_video_data(data_dir, img_size=(224,224), num_frames=5, split_rati
         y_val=split_3d_data['y_val'],
         y_test=split_3d_data['y_test']
     )
+    joblib.dump(split_3d_data, split_3d_data_path)
     return labels, split_3d_data
 
 def convert_3d_to_2d(split, data=None, train=None, val=None, test=None):
